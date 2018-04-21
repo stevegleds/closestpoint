@@ -1,3 +1,6 @@
+21 April 2018
+Added code to parse sector csv to dictionary
+Next step is to use this to calculate nearest sector
 20 April 2018
 Moved creation of postcodes array out of function so that only runs once (not 2,000,000 times!)
 20 April 2018
