@@ -1,4 +1,7 @@
 21 April 2018
+Used postcode sector file successfully on dummy data
+Next step: use subset of our results data. Need to import csv and then find way to append postcode sector
+21 April 2018
 Added code to parse sector csv to dictionary
 Next step is to use this to calculate nearest sector
 20 April 2018
