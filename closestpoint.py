@@ -45,7 +45,7 @@ def save_results(raw_file, results):
         writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Country Code', 'Date', 'Time', 'IpAddress', 'Latitude', 'Longitude', 'Download Speed', 'Upload Speed''Sector'])
         for item in results:
-            writer.writerow([item['CountryCode'], item['Date'], item['Date'], item['IpAddress'], item['Latitude'], item['Longitude'], item['DownloadSpeed'], item['UploadSpeed'], item['Sector']])
+            writer.writerow([item['CountryCode'], item['Date'], item['DateTimeStamp'], item['IpAddress'], item['Latitude'], item['Longitude'], item['DownloadSpeed'], item['UploadSpeed'], item['Sector']])
     f.close()
     return
 
@@ -75,7 +75,7 @@ def find_closest_sector(location, postcodes):
     return int(np.argmin(dist_2))
 
 
-def get_closest_points_new(speedtest_results_data, sector_coordinates_array, sector_points_data):
+def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_points_data):
     """
     Loops through the speedtest results and uses find_closest_sector() to find closest sector
     :param locations: the lat and lon of the speedtest results that need sector postcodes
@@ -102,7 +102,7 @@ def main():
     speedtest_results_data = parse(RESULTS_FILE, ',')
     sector_coordinates = get_coordinates(sector_data)
     sector_coordinates_array = np.asarray(sector_coordinates)
-    sectors, results = get_closest_points_new(speedtest_results_data, sector_coordinates_array, sector_data)
+    sectors, results = get_closest_points(speedtest_results_data, sector_coordinates_array, sector_data)
 
     save_results('updated_results.csv', results)
     end = time.time()
