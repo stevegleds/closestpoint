@@ -1,3 +1,7 @@
+23 April 2018
+Added timer so we can see how efficient it is
+Started using subset of data (1000 points)
+Took less than 1 second
 21 April 2018
 Used postcode sector file successfully on dummy data
 Next step: use subset of our results data. Need to import csv and then find way to append postcode sector
