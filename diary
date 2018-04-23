@@ -1,4 +1,7 @@
 23 April 2018
+I have an efficient algorithm for finding nearest post code sector but could probably improve data structure.
+Nonetheless I get 10,000 tests against 12000 sectors in 4 seconds
+23 April 2018
 Added timer so we can see how efficient it is
 Started using subset of data (1000 points)
 Took less than 1 second
