@@ -3,7 +3,7 @@ import csv
 import time  # todo : remove when code complete, only used to time the code for testing
 
 SECTOR_FILE = 'sector_points.csv'  # this is a test file
-RESULTS_FILE = 'mappoint006sample.csv'
+RESULTS_FILE = 'map6points.csv'
 print('Sector Data file used is: ', SECTOR_FILE)
 print('Speedtest Results Data file used is:', RESULTS_FILE)
 
@@ -43,7 +43,7 @@ def save_results(raw_file, results):
     #  results_file = open(raw_file, 'w')
     with open(raw_file, "w", newline='') as f:
         writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['Country Code', 'Date', 'Time', 'IpAddress', 'Latitude', 'Longitude', 'Download Speed', 'Upload Speed''Sector'])
+        writer.writerow(['Country Code', 'Date', 'Time', 'IpAddress', 'Latitude', 'Longitude', 'Download Speed', 'Upload Speed', 'Sector'])
         for item in results:
             writer.writerow([item['CountryCode'], item['Date'], item['DateTimeStamp'], item['IpAddress'], item['Latitude'], item['Longitude'], item['DownloadSpeed'], item['UploadSpeed'], item['Sector']])
     f.close()
@@ -86,11 +86,12 @@ def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_
     sectors = ['Sector']
     new_results = []
     for speedtest in speedtest_results_data:
-        closest_sector = find_closest_sector((float(speedtest['Latitude']), float(speedtest['Longitude'])), sector_coordinates_array)
-        sector_name = sector_points_data[closest_sector]['Postcode']
-        sectors.append(sector_name)
-        speedtest['Sector'] = sector_name
-        new_results.append(speedtest)
+        if speedtest['CountryCode'] == 'GB':
+            closest_sector = find_closest_sector((float(speedtest['Latitude']), float(speedtest['Longitude'])), sector_coordinates_array)
+            sector_name = sector_points_data[closest_sector]['Postcode']
+            sectors.append(sector_name)
+            speedtest['Sector'] = sector_name
+            new_results.append(speedtest)
     return sectors, new_results
 
 
@@ -98,15 +99,18 @@ def main():
     start = time.time()  # todo for testing only
     # Get postcode sector data from the postcode sector csv file:
     sector_data = parse(SECTOR_FILE, ',')
+    print('Sector data prepared after ', time.time() - start, 'seconds')
     # Get speedtest results data from the speedtest results file:
     speedtest_results_data = parse(RESULTS_FILE, ',')
+    print('Speedtest data prepared after ', time.time() - start, 'seconds')
     sector_coordinates = get_coordinates(sector_data)
     sector_coordinates_array = np.asarray(sector_coordinates)
+    print('Sector array prepared after ', time.time() - start, 'seconds')
     sectors, results = get_closest_points(speedtest_results_data, sector_coordinates_array, sector_data)
-
+    print('Results found after ', time.time() - start, 'seconds')
     save_results('updated_results.csv', results)
     end = time.time()
-    print("the code took ", start - end, "seconds")
+    print("the whole script took ", end - start, "seconds")
 
 
 if __name__ == "__main__":
