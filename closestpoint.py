@@ -75,6 +75,20 @@ def find_closest_sector(location, postcodes):
     return int(np.argmin(dist_2))
 
 
+def has_a_postcode(lat, long):
+    gb_north = 59
+    gb_south = 49
+    gb_east = 2
+    gb_west = -7
+    ni_north = 55
+    ni_south = 54
+    ni_east = -5.5
+    ni_west = -8.5
+    is_in_gb = (gb_south <= lat <= gb_north) and (gb_west <= long <= gb_east)
+    is_in_ni = (ni_south <= lat <= ni_north) and (ni_west <= long <= ni_east)
+    return is_in_gb and not is_in_ni
+
+
 def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_points_data):
     """
     Loops through the speedtest results and uses find_closest_sector() to find closest sector
@@ -86,14 +100,13 @@ def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_
     sectors = ['Sector']
     new_results = []
     for speedtest in speedtest_results_data:
-        if speedtest['CountryCode'] == 'GB':
+        if speedtest['CountryCode'] == 'GB' and has_a_postcode(float(speedtest['Latitude']), float(speedtest['Longitude'])):
             closest_sector = find_closest_sector((float(speedtest['Latitude']), float(speedtest['Longitude'])), sector_coordinates_array)
             sector_name = sector_points_data[closest_sector]['Postcode']
             sectors.append(sector_name)
             speedtest['Sector'] = sector_name
             new_results.append(speedtest)
     return sectors, new_results
-
 
 def main():
     start = time.time()  # todo for testing only
