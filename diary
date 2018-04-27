@@ -1,3 +1,6 @@
+27 April 2018
+Added splitfile because original data file was too big for excel and python memory
+No need to run closestpoint on each of the 3 output files
 26 April 2018
 Pushing to github
 25 April 2018

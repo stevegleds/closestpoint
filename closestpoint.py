@@ -2,10 +2,12 @@ import numpy as np
 import csv
 import time  # todo : remove when code complete, only used to time the code for testing
 
-SECTOR_FILE = 'sector_points.csv'  # this is a test file
-RESULTS_FILE = 'map6points.csv'
+SECTOR_FILE = 'sector_points.csv'  # this is used to map lat / long to sectors
+RESULTS_FILE = 'map6pointsgb_edit_003.csv'  # this is the full source file
+UPDATED_RESULTS_FILE = 'updated_results_003.csv'
 print('Sector Data file used is: ', SECTOR_FILE)
-print('Speedtest Results Data file used is:', RESULTS_FILE)
+print('Input file used is:', RESULTS_FILE)
+print('Output file will be:', UPDATED_RESULTS_FILE)
 
 
 def parse(raw_file, delimiter=','):
@@ -40,7 +42,6 @@ def save_results(raw_file, results):
     :param results: the data to be saved to raw_file
     :return: nothing. File is saved and closed within the function
     """
-    #  results_file = open(raw_file, 'w')
     with open(raw_file, "w", newline='') as f:
         writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Country Code', 'Date', 'Time', 'IpAddress', 'Latitude', 'Longitude', 'Download Speed', 'Upload Speed', 'Sector'])
@@ -108,6 +109,7 @@ def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_
             new_results.append(speedtest)
     return sectors, new_results
 
+
 def main():
     start = time.time()  # todo for testing only
     # Get postcode sector data from the postcode sector csv file:
@@ -121,7 +123,7 @@ def main():
     print('Sector array prepared after ', time.time() - start, 'seconds')
     sectors, results = get_closest_points(speedtest_results_data, sector_coordinates_array, sector_data)
     print('Results found after ', time.time() - start, 'seconds')
-    save_results('updated_results.csv', results)
+    save_results(UPDATED_RESULTS_FILE, results)
     end = time.time()
     print("the whole script took ", end - start, "seconds")
 
