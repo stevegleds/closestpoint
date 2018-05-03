@@ -3,8 +3,8 @@ import csv
 import time  # todo : remove when code complete, only used to time the code for testing
 
 SECTOR_FILE = 'sector_points.csv'  # this is used to map lat / long to sectors
-RESULTS_FILE = 'map6pointsgb_edit_003.csv'  # this is the source file
-UPDATED_RESULTS_FILE = 'updated_results_003_positive.csv'  # this is the output file with sector info
+RESULTS_FILE = 'map6pointsgb_edit_002.csv'  # this is the source file
+UPDATED_RESULTS_FILE = 'updated_results_002_positive.csv'  # this is the output file with sector info
 
 print('Sector Data file used is: ', SECTOR_FILE)
 print('Input file used is:', RESULTS_FILE)
