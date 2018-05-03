@@ -1,6 +1,9 @@
+03 May 2018
+Added has_a_postcode function to manage lat/long outside of uk
+Added is_good_speed function to filter out speeds too high or low. Now, just tests for -ve speeds
 27 April 2018
 Added splitfile because original data file was too big for excel and python memory
-No need to run closestpoint on each of the 3 output files
+No need to run closestpoint on each of the 3 output files {edit: not sure if this is true}
 26 April 2018
 Pushing to github
 25 April 2018

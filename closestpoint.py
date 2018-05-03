@@ -3,8 +3,9 @@ import csv
 import time  # todo : remove when code complete, only used to time the code for testing
 
 SECTOR_FILE = 'sector_points.csv'  # this is used to map lat / long to sectors
-RESULTS_FILE = 'map6pointsgb_edit_003.csv'  # this is the full source file
-UPDATED_RESULTS_FILE = 'updated_results_003.csv'
+RESULTS_FILE = 'map6pointsgb_edit_003.csv'  # this is the source file
+UPDATED_RESULTS_FILE = 'updated_results_003_positive.csv'  # this is the output file with sector info
+
 print('Sector Data file used is: ', SECTOR_FILE)
 print('Input file used is:', RESULTS_FILE)
 print('Output file will be:', UPDATED_RESULTS_FILE)
@@ -29,7 +30,8 @@ def parse(raw_file, delimiter=','):
         if row[1] == "":  # there is no text in the field so no data to process
             pass
         else:
-            parsed_data.append(dict(zip(fields, row)))  # Creates a new dict item for each row with col header as key and stores in a list
+            parsed_data.append(dict(zip(fields, row)))
+            # Creates a new dict item for each row with col header as key and stores in a list
         #  city_count += 1
     # close csv file
     opened_file.close()
@@ -44,9 +46,12 @@ def save_results(raw_file, results):
     """
     with open(raw_file, "w", newline='') as f:
         writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['Country Code', 'Date', 'Time', 'IpAddress', 'Latitude', 'Longitude', 'Download Speed', 'Upload Speed', 'Sector'])
+        writer.writerow(['Country Code', 'Date', 'Time', 'IpAddress', 'Latitude', 'Longitude',
+                         'Download Speed', 'Upload Speed', 'Sector'])
         for item in results:
-            writer.writerow([item['CountryCode'], item['Date'], item['DateTimeStamp'], item['IpAddress'], item['Latitude'], item['Longitude'], item['DownloadSpeed'], item['UploadSpeed'], item['Sector']])
+            writer.writerow([item['CountryCode'], item['Date'], item['DateTimeStamp'], item['IpAddress'],
+                             item['Latitude'], item['Longitude'],
+                             item['DownloadSpeed'] / 1024, item['UploadSpeed'] / 1024, item['Sector']])
     f.close()
     return
 
@@ -67,8 +72,10 @@ def find_closest_sector(location, postcodes):
     """
     Takes a single location and finds closest sector using postcodes np array
     dist_2 is an array containing the square of the distances to each sector postcode
-    There is no need to take the sqrt because we only need to identify which sector is closest and therefore don't need the actual distance
+    There is no need to take the sqrt because we only need to identify which sector is closest and
+    therefore don't need the actual distance
     :param postcodes: a numpy array of lat and lon of all postcode sectors
+    :param location: the lat / long of the result
     :return: the position of the 'winning' postcode sector in the postcodes array
     This will be used as the lookup value in the full sector data to get the postcode
     """
@@ -90,6 +97,10 @@ def has_a_postcode(lat, long):
     return is_in_gb and not is_in_ni
 
 
+def is_good_speed(speed):
+    return speed > 0
+
+
 def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_points_data):
     """
     Loops through the speedtest results and uses find_closest_sector() to find closest sector
@@ -101,8 +112,14 @@ def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_
     sectors = ['Sector']
     new_results = []
     for speedtest in speedtest_results_data:
-        if speedtest['CountryCode'] == 'GB' and has_a_postcode(float(speedtest['Latitude']), float(speedtest['Longitude'])):
-            closest_sector = find_closest_sector((float(speedtest['Latitude']), float(speedtest['Longitude'])), sector_coordinates_array)
+        speedtest['Latitude'] = float(speedtest['Latitude'])
+        speedtest['Longitude'] = float(speedtest['Longitude'])
+        speedtest['DownloadSpeed'] = float(speedtest['DownloadSpeed'])
+        speedtest['UploadSpeed'] = float(speedtest['UploadSpeed'])
+        if speedtest['CountryCode'] == 'GB' and \
+                has_a_postcode(speedtest['Latitude'], speedtest['Longitude']) and is_good_speed(speedtest['DownloadSpeed']):
+            closest_sector = find_closest_sector((speedtest['Latitude'], speedtest['Longitude']),
+                                                 sector_coordinates_array)
             sector_name = sector_points_data[closest_sector]['Postcode']
             sectors.append(sector_name)
             speedtest['Sector'] = sector_name
