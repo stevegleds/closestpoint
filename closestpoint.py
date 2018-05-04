@@ -3,6 +3,7 @@ import csv
 import time  # todo : remove when code complete, only used to time the code for testing
 
 SECTOR_FILE = 'sector_points.csv'  # this is used to map lat / long to sectors
+CONSTITUENCY_FILE = 'constituency_points.csv'  # this is used to map lat / long of data points to constituency
 RESULTS_FILE = 'map6pointsgb_edit_002.csv'  # this is the source file
 UPDATED_RESULTS_FILE = 'updated_results_002_positive.csv'  # this is the output file with sector info
 
@@ -47,11 +48,12 @@ def save_results(raw_file, results):
     with open(raw_file, "w", newline='') as f:
         writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Country Code', 'Date', 'Time', 'IpAddress', 'Latitude', 'Longitude',
-                         'Download Speed', 'Upload Speed', 'Sector'])
+                         'Download Speed', 'Upload Speed', 'Sector', 'Constituency'])
         for item in results:
             writer.writerow([item['CountryCode'], item['Date'], item['DateTimeStamp'], item['IpAddress'],
                              item['Latitude'], item['Longitude'],
-                             item['DownloadSpeed'] / 1024, item['UploadSpeed'] / 1024, item['Sector']])
+                             item['DownloadSpeed'] / 1024, item['UploadSpeed'] / 1024,
+                             item['Sector'], item['Constituency']])
     f.close()
     return
 
@@ -101,7 +103,8 @@ def is_good_speed(speed):
     return speed > 0
 
 
-def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_points_data):
+def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_data,
+                       constituency_coordinates_array, constituency_data):
     """
     Loops through the speedtest results and uses find_closest_sector() to find closest sector
     :param locations: the lat and lon of the speedtest results that need sector postcodes
@@ -110,6 +113,7 @@ def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_
     :return:
     """
     sectors = ['Sector']
+    constituencies = ['Constituency']
     new_results = []
     for speedtest in speedtest_results_data:
         speedtest['Latitude'] = float(speedtest['Latitude'])
@@ -120,25 +124,35 @@ def get_closest_points(speedtest_results_data, sector_coordinates_array, sector_
                 has_a_postcode(speedtest['Latitude'], speedtest['Longitude']) and is_good_speed(speedtest['DownloadSpeed']):
             closest_sector = find_closest_sector((speedtest['Latitude'], speedtest['Longitude']),
                                                  sector_coordinates_array)
-            sector_name = sector_points_data[closest_sector]['Postcode']
+            sector_name = sector_data[closest_sector]['Postcode']
             sectors.append(sector_name)
             speedtest['Sector'] = sector_name
+            closest_constituency = find_closest_sector((speedtest['Latitude'], speedtest['Longitude']),
+                                                 constituency_coordinates_array)
+            constituency_name = constituency_data[closest_constituency]['Constituency']
+            constituencies.append(constituency_name)
+            speedtest['Sector'] = sector_name
+            speedtest['Constituency'] = constituency_name
             new_results.append(speedtest)
-    return sectors, new_results
+    return sectors, constituencies, new_results
 
 
 def main():
     start = time.time()  # todo for testing only
     # Get postcode sector data from the postcode sector csv file:
     sector_data = parse(SECTOR_FILE, ',')
+    constituency_data = parse(CONSTITUENCY_FILE, ',')
     print('Sector data prepared after ', time.time() - start, 'seconds')
     # Get speedtest results data from the speedtest results file:
     speedtest_results_data = parse(RESULTS_FILE, ',')
     print('Speedtest data prepared after ', time.time() - start, 'seconds')
     sector_coordinates = get_coordinates(sector_data)
     sector_coordinates_array = np.asarray(sector_coordinates)
+    constituency_coordinates = get_coordinates(constituency_data)
+    constituency_coordinates_array = np.asarray(constituency_coordinates)
     print('Sector array prepared after ', time.time() - start, 'seconds')
-    sectors, results = get_closest_points(speedtest_results_data, sector_coordinates_array, sector_data)
+    sectors, constituencies, results = get_closest_points(speedtest_results_data, sector_coordinates_array,
+                                          sector_data, constituency_coordinates_array, constituency_data)
     print('Results found after ', time.time() - start, 'seconds')
     save_results(UPDATED_RESULTS_FILE, results)
     end = time.time()
